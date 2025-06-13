@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Çalışan Takip Sistemi</title>
+</head>
+<body>
+  <h1>Çalışan Giriş/Çıkış Takibi</h1>
+
+  <div>
+    <h3>Selahattin</h3>
+    <button onclick="sendWebhook('Selahattin', 'Geldim')">Geldim</button>
+    <button onclick="sendWebhook('Selahattin', 'Çıktım')">Çıktım</button>
+  </div>
+
+  <div>
+    <h3>Onur</h3>
+    <button onclick="sendWebhook('Onur', 'Geldim')">Geldim</button>
+    <button onclick="sendWebhook('Onur', 'Çıktım')">Çıktım</button>
+  </div>
+
+  <div>
+    <h3>Yunus</h3>
+    <button onclick="sendWebhook('Yunus', 'Geldim')">Geldim</button>
+    <button onclick="sendWebhook('Yunus', 'Çıktım')">Çıktım</button>
+  </div>
+
+  <div>
+    <h3>Akif</h3>
+    <button onclick="sendWebhook('Akif', 'Geldim')">Geldim</button>
+    <button onclick="sendWebhook('Akif', 'Çıktım')">Çıktım</button>
+  </div>
+
+  <div>
+    <h3>Umut</h3>
+    <button onclick="sendWebhook('Umut', 'Geldim')">Geldim</button>
+    <button onclick="sendWebhook('Umut', 'Çıktım')">Çıktım</button>
+  </div>
+
+  <div>
+    <h3>Emin</h3>
+    <button onclick="sendWebhook('Emin', 'Geldim')">Geldim</button>
+    <button onclick="sendWebhook('Emin', 'Çıktım')">Çıktım</button>
+  </div>
+
+  <script>
+    function sendWebhook(name, action) {
+      fetch("https://hook.eu2.make.com/1fc21j79qv4lzfpsjjcmlejfs3puckm5", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          isim: name,
+          islem: action,
+          zaman: new Date().toISOString()
+        })
+      });
+    }
+  </script>
+</body>
+</html>

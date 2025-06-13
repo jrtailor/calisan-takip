@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kargo Şubesi - Çalışan Takip Sistemi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            text-align: center;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .employee-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .employee-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .employee-card:hover {
+            border-color: #667eea;
+            transform: scale(1.02);
+        }
+
+        .employee-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-checkin {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .btn-checkin:hover {
+            background: linear-gradient(45deg, #218838, #1ba085);
+            transform: translateY(-2px);
+        }
+
+        .btn-checkout {
+            background: linear-gradient(45deg, #dc3545, #fd7e14);
+            color: white;
+        }
+
+        .btn-checkout:hover {
+            background: linear-gradient(45deg, #c82333, #e8650e);
+            transform: translateY(-2px);
+        }
+
+        .admin-panel {
+            grid-column: 1 / -1;
+        }
+
+        .admin-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .today-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .status-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+
+        .status-card.present {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+
+        .status-card.absent {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .status-card.partial {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .records-table th,
+        .records-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .records-table th {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+
+        .records-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-section select,
+        .filter-section input {
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .filter-section select:focus,
+        .filter-section input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .current-time {
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .last-action {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .export-btn {
+            background: linear-gradient(45deg, #6f42c1, #e83e8c);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            background: linear-gradient(45deg, #5a32a3, #d91a72);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .employee-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .admin-tabs {
+                flex-direction: column;
+            }
+            
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚛 Kargo Şubesi</h1>
+            <p>Çalışan Takip Sistemi</p>
+        </div>
+
+        <div class="current-time" id="currentTime"></div>
+
+        <div class="main-content">
+            <div class="card">
+                <h2>👥 Çalışan Paneli</h2>
+                <div class="employee-grid" id="employeeGrid">
+                    <!-- Çalışanlar burada oluşturulacak -->
+                </div>
+            </div>
+
+            <div class="card admin-panel">
+                <h2>🔧 Yönetici Paneli</h2>
+                <div class="admin-tabs">
+                    <button class="tab active" onclick="showTab('today')">Bugünkü Durum</button>
+                    <button class="tab" onclick="showTab('records')">Tüm Kayıtlar</button>
+                </div>
+
+                <div id="todayTab" class="tab-content active">
+                    <div class="today-status" id="todayStatus">
+                        <!-- Bugünkü durum burada gösterilecek -->
+                    </div>
+                </div>
+
+                <div id="recordsTab" class="tab-content">
+                    <div class="filter-section">
+                        <label>Çalışan:</label>
+                        <select id="employeeFilter">
+                            <option value="">Tüm Çalışanlar</option>
+                        </select>
+                        <label>Tarih:</label>
+                        <input type="date" id="dateFilter">
+                        <button class="btn btn-checkin" onclick="filterRecords()">Filtrele</button>
+                    </div>
+                    <table class="records-table">
+                        <thead>
+                            <tr>
+                                <th>Tarih</th>
+                                <th>Çalışan</th>
+                                <th>Geliş Saati</th>
+                                <th>Çıkış Saati</th>
+                                <th>Toplam Süre</th>
+                                <th>Çıkış Notu</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recordsTableBody">
+                            <!-- Kayıtlar burada gösterilecek -->
+                        </tbody>
+                    </table>
+                    <button class="export-btn" onclick="exportToCSV()">📊 CSV Olarak Dışa Aktar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Çalışan isimleri
+        const employees = ['Selahattin', 'Onur', 'Yunus', 'Akif', 'Umut', 'Emin'];
+        
+        // Veri saklama (normalde bu API'den gelecek)
+        let records = [];
+        
+        // Bugünkü tarih
+        function getTodayDate() {
+            return new Date().toISOString().split('T')[0];
+        }
+        
+        // Mevcut zamanı formatla
+        function formatTime(date) {
+            return date.toLocaleTimeString('tr-TR', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+        
+        // Mevcut tarih ve zamanı formatla
+        function formatDateTime(date) {
+            return date.toLocaleString('tr-TR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // Süre hesapla
+        function calculateDuration(checkin, checkout) {
+            if (!checkin || !checkout) return '-';
+            
+            const checkinTime = new Date(`2000-01-01 ${checkin}`);
+            const checkoutTime = new Date(`2000-01-01 ${checkout}`);
+            
+            const diff = checkoutTime - checkinTime;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            
+            return `${hours}s ${minutes}dk`;
+        }
+        
+        // Çalışan kartlarını oluştur
+        function createEmployeeCards() {
+            const grid = document.getElementById('employeeGrid');
+            grid.innerHTML = '';
+            
+            employees.forEach(employee => {
+                const card = document.createElement('div');
+                card.className = 'employee-card';
+                
+                const lastAction = getLastAction(employee);
+                
+                card.innerHTML = `
+                    <div class="employee-name">${employee}</div>
+                    <div class="button-group">
+                        <button class="btn btn-checkin" onclick="checkin('${employee}')">
+                            ✅ Geldim
+                        </button>
+                        <button class="btn btn-checkout" onclick="checkout('${employee}')">
+                            ❌ Çıktım
+                        </button>
+                    </div>
+                    <div class="last-action" id="lastAction-${employee}">
+                        ${lastAction}
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+        
+        // Son işlemi getir
+        function getLastAction(employee) {
+            const today = getTodayDate();
+            const todayRecord = records.find(r => r.employee === employee && r.date === today);
+            
+            if (!todayRecord) return 'Bugün henüz kayıt yok';
+            
+            if (todayRecord.checkout) {
+                return `Son çıkış: ${todayRecord.checkout}`;
+            } else if (todayRecord.checkin) {
+                return `Son giriş: ${todayRecord.checkin}`;
+            }
+            
+            return 'Bugün henüz kayıt yok';
+        }
+        
+        // Giriş kaydı
+        function checkin(employee) {
+            const today = getTodayDate();
+            const now = new Date();
+            const timeString = formatTime(now);
+            
+            let record = records.find(r => r.employee === employee && r.date === today);
+            
+            if (!record) {
+                record = {
+                    date: today,
+                    employee: employee,
+                    checkin: timeString,
+                    checkout: null,
+                    checkoutNote: null
+                };
+                records.push(record);
+            } else {
+                record.checkin = timeString;
+            }
+            
+            updateLastAction(employee, `Son giriş: ${timeString}`);
+            updateTodayStatus();
+            updateRecordsTable();
+            
+            // Başarı mesajı
+            showNotification(`${employee} - Giriş kaydedildi: ${timeString}`, 'success');
+        }
+        
+        // Çıkış kaydı
+        function checkout(employee) {
+            // Çıkış notu popup'ını göster
+            showCheckoutModal(employee);
+        }
+        
+        // Çıkış modal'ını göster
+        function showCheckoutModal(employee) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            `;
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                max-width: 400px;
+                width: 90%;
+                text-align: center;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            `;
+            
+            modalContent.innerHTML = `
+                <h3 style="color: #333; margin-bottom: 20px; font-size: 1.5rem;">
+                    🏁 ${employee} - Çıkış Kaydı
+                </h3>
+                <p style="color: #666; margin-bottom: 20px;">
+                    Çıkış sebebinizi belirtmek isterseniz not ekleyebilirsiniz:
+                </p>
+                <textarea id="checkoutNote" placeholder="Çıkış notu (isteğe bağlı)..." 
+                    style="width: 100%; height: 80px; padding: 10px; border: 2px solid #e9ecef; 
+                           border-radius: 8px; font-size: 14px; resize: vertical; margin-bottom: 20px;"></textarea>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button onclick="processCheckout('${employee}', true)" 
+                        style="background: linear-gradient(45deg, #28a745, #20c997); color: white; 
+                               padding: 12px 25px; border: none; border-radius: 8px; 
+                               font-weight: bold; cursor: pointer; transition: all 0.3s ease;">
+                        📝 Notla Gönder
+                    </button>
+                    <button onclick="processCheckout('${employee}', false)" 
+                        style="background: linear-gradient(45deg, #dc3545, #fd7e14); color: white; 
+                               padding: 12px 25px; border: none; border-radius: 8px; 
+                               font-weight: bold; cursor: pointer; transition: all 0.3s ease;">
+                        🚀 Direkt Gönder
+                    </button>
+                </div>
+                <button onclick="closeCheckoutModal()" 
+                    style="background: #6c757d; color: white; padding: 8px 15px; 
+                           border: none; border-radius: 5px; font-size: 12px; 
+                           cursor: pointer; margin-top: 15px;">
+                    ❌ İptal
+                </button>
+            `;
+            
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Global referans
+            window.currentCheckoutModal = modal;
+        }
+        
+        // Çıkış işlemini gerçekleştir
+        function processCheckout(employee, withNote) {
+            const today = getTodayDate();
+            const now = new Date();
+            const timeString = formatTime(now);
+            
+            let note = '';
+            if (withNote) {
+                const noteElement = document.getElementById('checkoutNote');
+                note = noteElement ? noteElement.value.trim() : '';
+            }
+            
+            let record = records.find(r => r.employee === employee && r.date === today);
+            
+            if (!record) {
+                record = {
+                    date: today,
+                    employee: employee,
+                    checkin: null,
+                    checkout: timeString,
+                    checkoutNote: note
+                };
+                records.push(record);
+            } else {
+                record.checkout = timeString;
+                record.checkoutNote = note;
+            }
+            
+            updateLastAction(employee, `Son çıkış: ${timeString}${note ? ' (Notlu)' : ''}`);
+            updateTodayStatus();
+            updateRecordsTable();
+            
+            // Modal'ı kapat
+            closeCheckoutModal();
+            
+            // Başarı mesajı
+            const noteText = note ? `\nNot: ${note}` : '';
+            showNotification(`${employee} - Çıkış kaydedildi: ${timeString}${noteText}`, 'success');
+        }
+        
+        // Çıkış modal'ını kapat
+        function closeCheckoutModal() {
+            if (window.currentCheckoutModal) {
+                document.body.removeChild(window.currentCheckoutModal);
+                window.currentCheckoutModal = null;
+            }
+        }
+        
+        // Son işlem güncelle
+        function updateLastAction(employee, text) {
+            const element = document.getElementById(`lastAction-${employee}`);
+            if (element) {
+                element.textContent = text;
+            }
+        }
+        
+        // Bildirim göster
+        function showNotification(message, type) {
+            // Basit bir alert kullanıyoruz, daha gelişmiş bir bildirim sistemi eklenebilir
+            alert(message);
+        }
+        
+        // Bugünkü durumu güncelle
+        function updateTodayStatus() {
+            const today = getTodayDate();
+            const statusDiv = document.getElementById('todayStatus');
+            statusDiv.innerHTML = '';
+            
+            employees.forEach(employee => {
+                const record = records.find(r => r.employee === employee && r.date === today);
+                const card = document.createElement('div');
+                
+                let status = 'absent';
+                let statusText = 'Gelmedi';
+                let statusIcon = '❌';
+                
+                if (record) {
+                    if (record.checkin && record.checkout) {
+                        status = 'present';
+                        statusText = 'Tamamlandı';
+                        statusIcon = '✅';
+                    } else if (record.checkin) {
+                        status = 'partial';
+                        statusText = 'İş yerinde';
+                        statusIcon = '⏰';
+                    }
+                }
+                
+                card.className = `status-card ${status}`;
+                card.innerHTML = `
+                    <div style="font-size: 2rem;">${statusIcon}</div>
+                    <div style="font-weight: bold; margin: 5px 0;">${employee}</div>
+                    <div style="color: #666;">${statusText}</div>
+                    ${record && record.checkin ? `<div style="font-size: 0.9rem;">Giriş: ${record.checkin}</div>` : ''}
+                    ${record && record.checkout ? `<div style="font-size: 0.9rem;">Çıkış: ${record.checkout}</div>` : ''}
+                `;
+                
+                statusDiv.appendChild(card);
+            });
+        }
+        
+        // Kayıtlar tablosunu güncelle
+        function updateRecordsTable() {
+            const tbody = document.getElementById('recordsTableBody');
+            tbody.innerHTML = '';
+            
+            // Kayıtları tarihe göre sırala (en yeni önce)
+            const sortedRecords = [...records].sort((a, b) => {
+                return new Date(b.date) - new Date(a.date);
+            });
+            
+            sortedRecords.forEach(record => {
+                const row = document.createElement('tr');
+                const noteDisplay = record.checkoutNote ? 
+                    `<span style="background: #fff3cd; padding: 2px 6px; border-radius: 3px; font-size: 0.9em;">${record.checkoutNote}</span>` : 
+                    '-';
+                    
+                row.innerHTML = `
+                    <td>${new Date(record.date).toLocaleDateString('tr-TR')}</td>
+                    <td>${record.employee}</td>
+                    <td>${record.checkin || '-'}</td>
+                    <td>${record.checkout || '-'}</td>
+                    <td>${calculateDuration(record.checkin, record.checkout)}</td>
+                    <td>${noteDisplay}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        // Kayıtları filtrele
+        function filterRecords() {
+            const employeeFilter = document.getElementById('employeeFilter').value;
+            const dateFilter = document.getElementById('dateFilter').value;
+            
+            const tbody = document.getElementById('recordsTableBody');
+            tbody.innerHTML = '';
+            
+            let filteredRecords = [...records];
+            
+            if (employeeFilter) {
+                filteredRecords = filteredRecords.filter(r => r.employee === employeeFilter);
+            }
+            
+            if (dateFilter) {
+                filteredRecords = filteredRecords.filter(r => r.date === dateFilter);
+            }
+            
+            // Tarihe göre sırala
+            filteredRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            filteredRecords.forEach(record => {
+                const row = document.createElement('tr');
+                const noteDisplay = record.checkoutNote ? 
+                    `<span style="background: #fff3cd; padding: 2px 6px; border-radius: 3px; font-size: 0.9em;">${record.checkoutNote}</span>` : 
+                    '-';
+                    
+                row.innerHTML = `
+                    <td>${new Date(record.date).toLocaleDateString('tr-TR')}</td>
+                    <td>${record.employee}</td>
+                    <td>${record.checkin || '-'}</td>
+                    <td>${record.checkout || '-'}</td>
+                    <td>${calculateDuration(record.checkin, record.checkout)}</td>
+                    <td>${noteDisplay}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        // Tab değiştir
+        function showTab(tabName) {
+            // Tüm tabları gizle
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Tüm tab butonlarını pasif yap
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Seçili tabı göster
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // CSV olarak dışa aktar
+        function exportToCSV() {
+            let csv = 'Tarih,Çalışan,Giriş Saati,Çıkış Saati,Toplam Süre,Çıkış Notu\n';
+            
+            records.forEach(record => {
+                const note = record.checkoutNote ? record.checkoutNote.replace(/,/g, ';') : '';
+                csv += `${record.date},${record.employee},${record.checkin || ''},${record.checkout || ''},${calculateDuration(record.checkin, record.checkout)},${note}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `calisanlar_${getTodayDate()}.csv`;
+            link.click();
+        }
+        
+        // Çalışan filtresi için seçenekleri oluştur
+        function populateEmployeeFilter() {
+            const select = document.getElementById('employeeFilter');
+            select.innerHTML = '<option value="">Tüm Çalışanlar</option>';
+            
+            employees.forEach(employee => {
+                const option = document.createElement('option');
+                option.value = employee;
+                option.textContent = employee;
+                select.appendChild(option);
+            });
+        }
+        
+        // Mevcut zamanı güncelle
+        function updateCurrentTime() {
+            const timeElement = document.getElementById('currentTime');
+            const now = new Date();
+            timeElement.textContent = `📅 ${formatDateTime(now)}`;
+        }
+        
+        // Sayfa yüklendiğinde çalışacak fonksiyonlar
+        document.addEventListener('DOMContentLoaded', function() {
+            createEmployeeCards();
+            updateTodayStatus();
+            updateRecordsTable();
+            populateEmployeeFilter();
+            updateCurrentTime();
+            
+            // Her saniye zamanı güncelle
+            setInterval(updateCurrentTime, 1000);
+            
+            // Demo verileri ekle (kaldırabilirsiniz)
+            const today = getTodayDate();
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            records.push({
+                date: yesterday.toISOString().split('T')[0],
+                employee: 'Selahattin',
+                checkin: '08:30:00',
+                checkout: '18:00:00',
+                checkoutNote: 'Mesai tamamlandı'
+            });
+            
+            records.push({
+                date: yesterday.toISOString().split('T')[0],
+                employee: 'Onur',
+                checkin: '09:00:00',
+                checkout: '17:30:00',
+                checkoutNote: null
+            });
+            
+            updateTodayStatus();
+            updateRecordsTable();
+        });
+    </script>
+
+<script>
+function sendWebhook(name, action) {
+  fetch("https://hook.eu2.make.com/1fc21j79qv4lzfpsjjcmlejfs3puckm5", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      isim: name,
+      islem: action,
+      zaman: new Date().toISOString()
+    })
+  });
+}
+</script>
+
+</body>
+</html>
